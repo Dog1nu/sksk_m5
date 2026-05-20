@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歩数データ集計システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 16px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        header h1 {
+            color: #fff;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .controls label {
+            font-weight: 600;
+            color: #a0aec0;
+            font-size: 14px;
+        }
+
+        .controls select, .controls input {
+            padding: 8px 14px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .controls select:focus, .controls input:focus {
+            outline: none;
+            border-color: #64ffda;
+        }
+
+        .controls select option {
+            background: #1a1a2e;
+        }
+
+        /* 生徒リスト */
+        .student-list {
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .student-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .student-list th {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #64ffda;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .student-list td {
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 12px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .student-list tr:hover td {
+            background: rgba(100, 255, 218, 0.08);
+        }
+
+        .student-list tr.active td {
+            background: rgba(100, 255, 218, 0.15);
+            color: #64ffda;
+        }
+
+        /* 統計カード */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(100, 255, 218, 0.3);
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #8898aa;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-card .unit {
+            font-size: 13px;
+            color: #8898aa;
+            margin-left: 4px;
+        }
+
+        .stat-card .sub {
+            font-size: 11px;
+            color: #64ffda;
+            margin-top: 4px;
+        }
+
+        /* メインコンテンツ */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .card h2 {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* 日付セレクター */
+        .date-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .date-nav button {
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .date-nav button:hover {
+            background: rgba(100, 255, 218, 0.15);
+            border-color: #64ffda;
+        }
+
+        .date-nav .current-date {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        /* グラフ */
+        .step-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 180px;
+            padding: 20px 0 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            overflow-x: auto;
+        }
+
+        .step-bar-item {
+            flex: 1;
+            min-width: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .step-bar-item:hover {
+            opacity: 0.8;
+        }
+
+        .step-bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+            position: relative;
+        }
+
+        .step-bar.low { background: linear-gradient(180deg, #64ffda, #38b2ac); }
+        .step-bar.medium { background: linear-gradient(180deg, #749aff, #4285f4); }
+        .step-bar.high { background: linear-gradient(180deg, #ffb74d, #ff9800); }
+        .step-bar.very-high { background: linear-gradient(180deg, #ff8ab4, #e91e63); }
+
+        .step-label {
+            font-size: 10px;
+            color: #8898aa;
+        }
+
+        .step-value {
+            font-size: 11px;
+            font-weight: 600;
+            color: #a0aec0;
+        }
+
+        /* 記録一覧 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #a0aec0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 12px;
+        }
+
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+            color: #e0e0e0;
+        }
+
+        table tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .time-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .time-badge.morning { background: rgba(100, 255, 218, 0.15); color: #64ffda; }
+        .time-badge.afternoon { background: rgba(255, 183, 77, 0.15); color: #ffb74d; }
+        .time-badge.evening { background: rgba(116, 154, 255, 0.15); color: #749aff; }
+
+        /* リアルタイム更新インジケーター */
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(100, 255, 218, 0.08);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #64ffda;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #64ffda;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* 今日の達成状況 */
+        .today-status {
+            margin-top: 12px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .status-steps {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .goal-progress {
+            width: 60px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .goal-progress .fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+
+        /* 週間比較 */
+        .week-compare {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .week-day {
+            text-align: center;
+            padding: 12px 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .week-day .day-name {
+            font-size: 11px;
+            color: #8898aa;
+            margin-bottom: 6px;
+        }
+
+        .week-day .day-steps {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .week-day.today {
+            background: rgba(100, 255, 218, 0.1);
+            border-color: rgba(100, 255, 218, 0.3);
+        }
+
+        .week-day.goal-met {
+            border-color: rgba(100, 255, 218, 0.4);
+        }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            background: rgba(100, 255, 218, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 255, 218, 0.3);
+            border-radius: 12px;
+            color: #64ffda;
+            font-size: 14px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* 歩数注意表示 */
+        .step-caution {
+            background: rgba(255, 202, 40, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 202, 40, 0.25);
+            border-left: 3px solid #ffca28;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+        }
+
+        .step-caution .caution-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffca28;
+        }
+
+        .step-caution .caution-content {
+            font-size: 13px;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .step-caution .caution-name {
+            color: #ffca28;
+            font-weight: 600;
+        }
+
+        .step-caution .caution-value {
+            color: #ffca28;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>保育補助システム</h1>
+            <div class="controls">
+                <label>期間:</label>
+                <select id="monthSelector">
+                    <option value="2026-04" selected>2026年4月</option>
+                    <option value="2026-03">2026年3月</option>
+                    <option value="2026-02">2026年2月</option>
+                    <option value="2026-01">2026年1月</option>
+                </select>
+                <label>レポート形式:</label>
+                <select id="reportType">
+                    <option value="daily">日別集計</option>
+                    <option value="weekly">週別集計</option>
+                    <option value="monthly">月別集計</option>
+                </select>
+            </div>
+            <div class="student-list" id="studentList">
+            </div>
+        </header>
+
+        <!-- リアルタイム更新インジケーター -->
+        <div class="live-indicator">
+            <span class="live-dot"></span>
+            <span>リアルタイム集計中 - 最新更新: <span id="lastUpdate">14:32:15</span></span>
+        </div>
+
+        <!-- 歩数注意表示（常時表示） -->
+        <div class="step-caution" id="stepCaution">
+            <div class="caution-header">
+                <span>⚠️ 歩数注意</span>
+            </div>
+            <div class="caution-content" id="cautionContent">
+            </div>
+        </div>
+
+        <!-- 統計カード -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">本日の総歩数</div>
+                <div class="value" id="totalSteps">0</div>
+                <div class="sub">前日比 +3,421 (+7.7%)</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">1人あたり平均</div>
+                <div class="value" id="avgSteps">0</div>
+                <div class="sub">目標: 10,000歩</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">歩行時間合計</div>
+                <div class="value" id="totalWalkTime">0<span class="unit">分</span></div>
+                <div class="sub">前日比 +28分</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">消費カロリー</div>
+                <div class="value" id="totalCalories">0<span class="unit">kcal</span></div>
+                <div class="sub">前日比 +32kcal</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">目標達成者</div>
+                <div class="value" id="goalMetCount">0<span class="unit">人</span></div>
+                <div class="sub" id="goalMetPercent">/ 40人 (0%)</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">今月の累計</div>
+                <div class="value" id="monthTotal">0</div>
+                <div class="sub">残日: 2日</div>
+            </div>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="main-content">
+            <!-- 左カラム -->
+            <div>
+                <!-- 今日の詳細 -->
+                <div class="card">
+                    <h2>📍 今日の歩数詳細</h2>
+                    <div class="date-nav">
+                        <button onclick="changeDate(-1)">◀ 前日</button>
+                        <span class="current-date" id="currentDate">2026年4月28日 (火)</span>
+                        <button onclick="changeDate(1)">翌日 ▶</button>
+                    </div>
+                    <div class="step-chart" id="hourlyChart">
+                    </div>
+                </div>
+
+                <!-- 週間比較 -->
+                <div class="card" style="margin-top: 16px;">
+                    <h2>📅 今週の歩数比較</h2>
+                    <div class="week-compare" id="weekCompare">
+                    </div>
+                </div>
+
+                <!-- 全生徒記録 -->
+                <div class="card" style="margin-top: 16px;">
+                    <h2>📋 全生徒記録（4月28日）</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>順位</th>
+                                <th>名前</th>
+                                <th>歩数</th>
+                                <th>達成率</th>
+                                <th>状況</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 右カラム -->
+            <div>
+                <!-- 今日の達成状況 -->
+                <div class="card">
+                    <h2>🎯 今日の目標達成状況</h2>
+                    <div class="today-status" id="goalStatus">
+                    </div>
+                </div>
+
+                <!-- 本日のタイムライン -->
+                <div class="card" style="margin-top: 16px;">
+                    <h2>⏱ タイムライン</h2>
+                    <div class="today-status" id="timeline">
+                    </div>
+                </div>
+
+                <!-- 警告 -->
+                <div class="card" style="margin-top: 16px;">
+                    <h2>⚠️ 異常警告</h2>
+                    <div class="today-status" id="warningsList" style="max-height: 250px; overflow-y: auto;">
+                    </div>
+                </div>
+
+                <!-- データ受信ログ -->
+                <div class="card" style="margin-top: 16px;">
+                    <h2>📡 データ受信ログ</h2>
+                    <div class="today-status" id="dataLog" style="max-height: 200px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知 -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 目標: 10,000歩
+        const GOAL = 10000;
+
+        // 生徒リスト（40人）
+        const studentNames = [
+            'たろう', 'はなこ', 'みつき', 'けい', 'ゆうた', 'あき', 'みほ', 'こうた',
+            'さくら', 'まな', 'なおき', 'りく', 'あずさ', 'たくま', 'ゆいの', 'けんと',
+            'れいら', 'しおん', 'ふみ', 'あかり', 'わたる', 'ちなつ', 'りょう', 'みずき',
+            'そら', 'はる', 'なつき', 'ゆうき', 'あやか', 'りの', 'だいすけ', 'みお',
+            'こうへい', 'あおい', 'たけし', 'さやか', 'りょうた', 'みゆう', 'ゆうな', 'けいこ'
+        ];
+
+        // 統一カラー
+        const PRIMARY_COLOR = '#64ffda';
+
+        // 生徒データ
+        const studentData = {};
+        
+        // 時間別データ生成
+        function generateHourlyData(totalSteps) {
+            const data = new Array(24).fill(0);
+            const activeHours = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+            const weights = activeHours.map(h => {
+                if (h >= 8 && h <= 9) return 0.12;
+                if (h >= 12 && h <= 13) return 0.10;
+                if (h >= 15 && h <= 17) return 0.16;
+                if (h >= 18 && h <= 19) return 0.08;
+                if (h === 6 || h === 20) return 0.03;
+                return 0.06;
+            });
+            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            
+            activeHours.forEach((h, i) => {
+                const proportion = weights[i] / totalWeight;
+                data[h] = Math.floor(totalSteps * proportion * (0.8 + Math.random() * 0.4));
+            });
+            
+            return data;
+        }
+
+        // 40人の生徒データ生成（統一カラー）
+        studentNames.forEach((name, index) => {
+            const baseSteps = 4000 + Math.floor(Math.random() * 8000);
+            studentData[name] = {
+                name: name,
+                color: PRIMARY_COLOR,
+                todaySteps: baseSteps,
+                goalMet: baseSteps >= 10000,
+                walkTime: Math.floor(baseSteps / 150),
+                calories: Math.floor(baseSteps * 0.008),
+                hourly: generateHourlyData(baseSteps)
+            };
+        });
+
+        let currentStudent = studentNames[0];
+        let selectedDate = 28;
+
+        // 月間の日別データ
+        const monthlyData = {};
+        for (let d = 1; d <= 30; d++) {
+            const dayOfWeek = new Date(2026, 3, d).getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            
+            monthlyData[d] = {};
+            studentNames.forEach((name, index) => {
+                if (isWeekend) {
+                    monthlyData[d][name] = Math.floor(Math.random() * 4000 + 2000);
+                } else {
+                    monthlyData[d][name] = Math.floor(Math.random() * 7000 + 5000);
+                }
+            });
+        }
+
+        // 生徒リストを描画（テーブル形式）
+        function drawStudentList() {
+            const container = document.getElementById('studentList');
+            const sortedStudents = Object.values(studentData).sort((a, b) => b.todaySteps - a.todaySteps);
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">順位</th>
+                            <th>名前</th>
+                            <th style="width: 80px; text-align: right;">歩数</th>
+                            <th style="width: 60px; text-align: right;">達成率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sortedStudents.map((student, index) => `
+                            <tr class="${student.name === currentStudent ? 'active' : ''}" onclick="selectStudent('${student.name}')">
+                                <td>${index + 1}</td>
+                                <td>${student.name}</td>
+                                <td style="text-align: right;">${student.todaySteps.toLocaleString()}</td>
+                                <td style="text-align: right;">${Math.min(Math.floor(student.todaySteps / GOAL * 100), 100)}%</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // 生徒選択
+        function selectStudent(name) {
+            currentStudent = name;
+            drawStudentList();
+            drawHourlyChart();
+        }
+
+        // 時間帯グラフを描画（現在時刻まで只显示）
+        function drawHourlyChart() {
+            const chart = document.getElementById('hourlyChart');
+            const data = studentData[currentStudent].hourly;
+            const currentHour = new Date().getHours();
+            
+            // 現在時刻まで的数据只显示
+            const visibleData = data.slice(0, currentHour + 1);
+            const maxSteps = Math.max(...visibleData);
+            
+            chart.innerHTML = visibleData.map((steps, hour) => {
+                const height = maxSteps > 0 ? (steps / maxSteps) * 150 : 0;
+                let level = 'low';
+                if (steps > 1000) level = 'very-high';
+                else if (steps > 500) level = 'high';
+                else if (steps > 200) level = 'medium';
+                
+                const isCurrentHour = hour === currentHour;
+                
+                return `
+                    <div class="step-bar-item" title="${hour}:00 - ${steps > 0 ? steps : '-'}歩">
+                        <span class="step-value">${steps > 0 ? steps : ''}</span>
+                        <div class="step-bar ${level}" style="height: ${Math.max(height, 2)}px; background: ${isCurrentHour ? 'rgba(255,255,255,0.5)' : studentData[currentStudent].color};"></div>
+                        <span class="step-label" style="${isCurrentHour ? 'color: #64ffda; font-weight: 600;' : ''}">${hour}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 週間比較を描画
+        function drawWeekCompare() {
+            const container = document.getElementById('weekCompare');
+            const days = ['月', '火', '水', '木', '金', '土', '日'];
+            const today = 28;
+            
+            let html = '';
+            for (let i = 0; i < 7; i++) {
+                const date = today - 1 + i;
+                const isToday = i === 1;
+                
+                let steps = '-';
+                let isGoalMet = false;
+                let isTodayClass = '';
+                
+                if (date >= 1 && date <= 28) {
+                    const dayData = monthlyData[date];
+                    if (dayData) {
+                        const total = Object.values(dayData).reduce((a, b) => a + b, 0);
+                        steps = total > 0 ? Math.floor(total / 40).toLocaleString() : '-';
+                        isGoalMet = total >= GOAL * 40;
+                    }
+                }
+                
+                if (isToday) {
+                    const total = Object.values(studentData).reduce((a, b) => a + b.todaySteps, 0);
+                    steps = Math.floor(total / 40).toLocaleString();
+                    isGoalMet = total >= GOAL * 40;
+                    isTodayClass = 'today';
+                }
+
+                html += `
+                    <div class="week-day ${isTodayClass} ${isGoalMet ? 'goal-met' : ''}">
+                        <div class="day-name">${days[i]}</div>
+                        <div class="day-steps">${steps}</div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // 目標達成状況を描画
+        function drawGoalStatus() {
+            const container = document.getElementById('goalStatus');
+            const sortedStudents = Object.values(studentData).sort((a, b) => b.todaySteps - a.todaySteps);
+            
+            container.innerHTML = sortedStudents.slice(0, 10).map(student => {
+                const percent = Math.min((student.todaySteps / GOAL) * 100, 100);
+                const remaining = student.goalMet ? '✓' : `${(GOAL - student.todaySteps).toLocaleString()}歩`;
+                
+                return `
+                    <div class="status-item">
+                        <div class="status-name">
+                            <span style="color: ${PRIMARY_COLOR}">●</span>
+                            ${student.name}
+                        </div>
+                        <div class="status-steps" style="color: ${PRIMARY_COLOR}">
+                            ${student.todaySteps.toLocaleString()}
+                        </div>
+                        <div class="goal-progress">
+                            <div class="fill" style="width: ${percent}%; background: ${PRIMARY_COLOR};"></div>
+                        </div>
+                        <span style="font-size: 11px; color: ${student.goalMet ? PRIMARY_COLOR : '#8898aa'}">${remaining}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 歩数注意を描画（常時表示）
+        function drawWarnings() {
+            const container = document.getElementById('cautionContent');
+            
+            // ダミーデータ: けい君の歩数が普段の33%少ない
+            const dummyCaution = {
+                name: 'けい',
+                ratio: 33
+            };
+            
+            container.innerHTML = `
+                <strong class="caution-name">${dummyCaution.name}</strong>君の歩数が普段の<span class="caution-value">${dummyCaution.ratio}%</span>少ないです
+            `;
+        }
+
+        // タイムラインを描画
+        function drawTimeline() {
+            const container = document.getElementById('timeline');
+            const events = [
+                { time: '06:42', text: 'たろう 起床', type: 'morning' },
+                { time: '07:15', text: 'はなこ 散歩開始', type: 'morning' },
+                { time: '08:30', text: 'みつき 出勤開始', type: 'morning' },
+                { time: '09:00', text: 'けい 業務開始', type: 'morning' },
+                { time: '10:22', text: 'たろう 1000歩達成', type: 'morning' },
+                { time: '11:45', text: 'ゆうた 昼食移動', type: 'afternoon' },
+                { time: '12:00', text: '全員 昼休憩', type: 'afternoon' },
+                { time: '13:30', text: 'たろう 2000歩達成', type: 'afternoon' },
+                { time: '14:15', text: 'はなこ 2000歩達成', type: 'afternoon' },
+                { time: '14:32', text: 'けい データ送信', type: 'afternoon' },
+                { time: '15:00', text: 'みつき 2000歩達成', type: 'afternoon' },
+                { time: '16:20', text: 'たろう 3000歩達成', type: 'evening' },
+            ];
+            
+            container.innerHTML = events.map(e => `
+                <div class="status-item" style="font-size: 12px;">
+                    <span class="time-badge ${e.type}">${e.time}</span>
+                    <span style="color: #e0e0e0;">${e.text}</span>
+                </div>
+            `).join('');
+        }
+
+        // データ受信ログを描画
+        function drawDataLog() {
+            const container = document.getElementById('dataLog');
+            const logs = [
+                { time: '14:32:15', text: 'たろう からデータ受信 (12,450歩)', name: 'たろう' },
+                { time: '14:30:42', text: 'みつき からデータ受信 (9,450歩)', name: 'みつき' },
+                { time: '14:28:10', text: 'はなこ からデータ受信 (11,280歩)', name: 'はなこ' },
+                { time: '14:25:33', text: 'けい からデータ受信 (8,730歩)', name: 'けい' },
+                { time: '14:22:18', text: 'ゆうた からデータ受信 (7,820歩)', name: 'ゆうた' },
+                { time: '14:00:00', text: '時間刻みの集計を更新', name: null },
+                { time: '13:00:00', text: '時間刻みの集計を更新', name: null },
+                { time: '12:58:45', text: 'はなこ からデータ受信 (11,120歩)', name: 'はなこ' },
+            ];
+            
+            container.innerHTML = logs.map(l => `
+                <div class="status-item" style="font-size: 11px;">
+                    <span style="color: #8898aa;">${l.time}</span>
+                    <span style="color: ${l.name ? studentData[l.name]?.color || '#8898aa' : '#64ffda'};">${l.text}</span>
+                </div>
+            `).join('');
+        }
+
+        // 全生徒記録表
+        function drawRecordsTable() {
+            const tbody = document.getElementById('recordsBody');
+            const sorted = Object.values(studentData).sort((a, b) => b.todaySteps - a.todaySteps);
+            
+            tbody.innerHTML = sorted.map((student, index) => {
+                const percent = Math.min((student.todaySteps / GOAL) * 100, 100).toFixed(0);
+                const statusClass = student.goalMet ? 'morning' : 'afternoon';
+                const statusText = student.goalMet ? '✓ 達成' : `${(GOAL - student.todaySteps).toLocaleString()}歩剩余`;
+                
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td style="color: ${PRIMARY_COLOR}; font-weight: 600;">${student.name}</td>
+                        <td style="font-weight: 600;">${student.todaySteps.toLocaleString()}</td>
+                        <td>
+                            <div class="goal-progress" style="width: 80px;">
+                                <div class="fill" style="width: ${percent}%; background: ${PRIMARY_COLOR};"></div>
+                            </div>
+                            <span style="font-size: 11px;">${percent}%</span>
+                        </td>
+                        <td><span class="time-badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 日付変更
+        function changeDate(offset) {
+            selectedDate += offset;
+            if (selectedDate < 1) selectedDate = 30;
+            if (selectedDate > 30) selectedDate = 1;
+            
+            const dayOfWeek = new Date(2026, 3, selectedDate).getDay();
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            document.getElementById('currentDate').textContent = `${2026}年${4}月${selectedDate}日 (${days[dayOfWeek]})`;
+            
+            // この日のデータで更新
+            const dayData = monthlyData[selectedDate];
+            if (dayData) {
+                studentNames.forEach((name, index) => {
+                    if (dayData[name]) {
+                        studentData[name].todaySteps = dayData[name];
+                        studentData[name].goalMet = dayData[name] >= GOAL;
+                        studentData[name].hourly = generateHourlyData(dayData[name]);
+                    }
+                });
+                drawGoalStatus();
+                drawHourlyChart();
+                drawRecordsTable();
+                updateStats();
+            }
+        }
+
+        // 統計更新
+        function updateStats() {
+            const total = Object.values(studentData).reduce((a, b) => a + b.todaySteps, 0);
+            const avg = Math.floor(total / Object.keys(studentData).length);
+            const totalTime = Object.values(studentData).reduce((a, b) => a + b.walkTime, 0);
+            const totalCal = Object.values(studentData).reduce((a, b) => a + b.calories, 0);
+            const goalMet = Object.values(studentData).filter(s => s.goalMet).length;
+            
+            document.getElementById('totalSteps').textContent = total.toLocaleString();
+            document.getElementById('avgSteps').textContent = avg.toLocaleString();
+            document.getElementById('totalWalkTime').innerHTML = `${totalTime}<span class="unit">分</span>`;
+            document.getElementById('totalCalories').innerHTML = `${totalCal}<span class="unit">kcal</span>`;
+            document.getElementById('goalMetCount').innerHTML = `${goalMet}<span class="unit">人</span>`;
+            document.getElementById('goalMetPercent').textContent = `/ ${Object.keys(studentData).length}人 (${Math.floor(goalMet / Object.keys(studentData).length * 100)}%)`;
+        }
+
+        // 通知を表示
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.classList.add('show');
+            setTimeout(() => notif.classList.remove('show'), 3000);
+        }
+
+        // リアルタイム更新をシミュレーション
+        function simulateRealtimeUpdate() {
+            const names = Object.keys(studentData);
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const increment = Math.floor(Math.random() * 200 + 50);
+            studentData[randomName].todaySteps += increment;
+            studentData[randomName].goalMet = studentData[randomName].todaySteps >= GOAL;
+            
+            // 最後の更新時間を更新
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            
+            updateStats();
+            drawGoalStatus();
+            
+            // ランダムに通知を表示（30%の確率）
+            if (Math.random() < 0.3) {
+                showNotification(`📡 ${studentData[randomName].name} から新しいデータ受信`);
+            }
+        }
+
+        // 初期化
+        function init() {
+            drawStudentList();
+            drawHourlyChart();
+            drawWeekCompare();
+            drawGoalStatus();
+            drawWarnings();
+            drawTimeline();
+            drawDataLog();
+            drawRecordsTable();
+            updateStats();
+            
+            // 10秒ごとにリアルタイム更新をシミュレート
+            setInterval(simulateRealtimeUpdate, 10000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
