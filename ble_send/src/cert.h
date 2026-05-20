@@ -1,0 +1,94 @@
+#ifndef CERT_H
+#define CERT_H
+
+const char* WIFI_SSID = "Buffalo-G-5910";
+const char* WIFI_PASS = "5n58b4k667fva";
+
+/*
+const char* WIFI_SSID = "TsUki";
+const char* WIFI_PASS = "123456789";*/
+
+const char* API_URL = "https://7c4e1etj65.execute-api.ap-northeast-1.amazonaws.com/register-new-power-generation-module";
+const char* LOCAL_URL = "http://192.168.11.11:8080/register-new-power-generation-module";
+const char* MQTT_URL = "an18mjyngp4x1-ats.iot.ap-northeast-1.amazonaws.com";
+const char* MQTT_LOCAL_URL = "192.168.11.11";
+
+// 自動アップデート用ローカルサーバのベースURL（binを配布するディレクトリ）
+#ifndef LOCAL_UPDATE_URL
+#define LOCAL_UPDATE_URL "http://192.168.11.2:8080/firmware"
+#endif
+
+const char* CA_CERT = \
+"-----BEGIN CERTIFICATE-----\n" \
+"MIIDQTCCAimgAwIBAgITBmyfz5m/jAo54vB4ikPmljZbyjANBgkqhkiG9w0BAQsF\n" \
+"ADA5MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6\n" \
+"b24gUm9vdCBDQSAxMB4XDTE1MDUyNjAwMDAwMFoXDTM4MDExNzAwMDAwMFowOTEL\n" \
+"MAkGA1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJv\n" \
+"b3QgQ0EgMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4gHHKeNXj\n" \
+"ca9HgFB0fW7Y14h29Jlo91ghYPl0hAEvrAIthtOgQ3pOsqTQNroBvo3bSMgHFzZM\n" \
+"9O6II8c+6zf1tRn4SWiw3te5djgdYZ6k/oI2peVKVuRF4fn9tBb6dNqcmzU5L/qw\n" \
+"IFAGbHrQgLKm+a/sRxmPUDgH3KKHOVj4utWp+UhnMJbulHheb4mjUcAwhmahRWa6\n" \
+"VOujw5H5SNz/0egwLX0tdHA114gk957EWW67c4cX8jJGKLhD+rcdqsq08p8kDi1L\n" \
+"93FcXmn/6pUCyziKrlA4b9v7LWIbxcceVOF34GfID5yHI9Y/QCB/IIDEgEw+OyQm\n" \
+"jgSubJrIqg0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC\n" \
+"AYYwHQYDVR0OBBYEFIQYzIU07LwMlJQuCFmcx7IQTgoIMA0GCSqGSIb3DQEBCwUA\n" \
+"A4IBAQCY8jdaQZChGsV2USggNiMOruYou6r4lK5IpDB/G/wkjUu0yKGX9rbxenDI\n" \
+"U5PMCCjjmCXPI6T53iHTfIUJrU6adTrCC2qJeHZERxhlbI1Bjjt/msv0tadQ1wUs\n" \
+"N+gDS63pYaACbvXy8MWy7Vu33PqUXHeeE6V/Uq2V8viTO96LXFvKWlJbYK8U90vv\n" \
+"o/ufQJVtMVT8QtPHRh8jrdkPSHCa2XV4cdFyQzR1bldZwgJcJmApzyMZFo6IQ6XU\n" \
+"5MsI+yMRQ+hDKXJioaldXgjUkK642M4UwtBV8ob2xJNDd2ZhwLnoQdeXeGADbkpy\n" \
+"rqXRfboQnoZsG4q5WTP468SQvvG5\n" \
+"-----END CERTIFICATE-----\n";
+
+const char* CLIENT_KEY = \
+"-----BEGIN RSA PRIVATE KEY-----\n" \
+"MIIEowIBAAKCAQEA2gAt+gdtfiM4pxSQ4pUbLkNxp1iQT/AB4aq4DDdjgI/kaR1w\n" \
+"+FgHiLL7MMpNCT4+qOK66fX8YQTsqINUyop1JTRXm4vOPr/BEuFGIjTmADKzPtFR\n" \
+"IFeEQKeFMT+Xe1d1h/aBbo8kCfXmwwarxIZsrtRPg44NXn3KoZXxyuSvRa+/Po1t\n" \
+"92WkRC8b97bgp5b4sLq/hWWZwiDdoxqGnKAg5OprtCJl8R561/5S5rLImQS8pAW7\n" \
+"95HRAY5Oq4eiwCkuW2Fbybj1T9mWa39cGsfnlGOMH3pCpuAUWA4ouBnXlOIPrdEV\n" \
+"Li5W+Z3iPWu8GR3kbgLYEtm7Yd3EqntGZAfjjQIDAQABAoIBAQCltcc9LNI9NNbG\n" \
+"oqpzofYUV64YEAk6ym0TtirLFntraXWttXR/QqMPdUXd05l1cjw9MoP0fkjHEvA2\n" \
+"NAaLI25ixoPluAMhza8dA+LE88L12ZRJJuFtHTlp0C09v2INnvC3VlkSynoRnDs6\n" \
+"emKtM6V/y+FZVeyxrBsQcyNmIClfZQ29+Z67Jq91zTbTm6ZE+Uj9ahGb09sslIfg\n" \
+"Fzu91X617VoHpAdLpPxXCqgLAIc3FuhtMQwsps/W7bwWuVzeE42JH9Ah+5J4NcKd\n" \
+"S1LP43K9Ln8P8x4uUpBWSxB7gH1Oasfo996gxMSeLVYp6A/Ws/s0vZmL8EJpxJvH\n" \
+"ajWo/LVBAoGBAPsvvbMG3ezxi/Bl6lPORSM7fknnXpLkFpwwg6YEnFZ5xTY5VXJ2\n" \
+"2NdXULj6WLAYsTYmqJIdS6Cq6fKMFWIBNAKEIyDPk1ZZfEQzbz9FSCWnw1/OXQau\n" \
+"D9L88bpuFTcyip4mQXyOd0dSFgZJQrtDwv6w1skQQ1alkr06zzJCMUGxAoGBAN4t\n" \
+"oyW+6F0ZJrXN666FMx09Bb8WXZxP2ctax9x+ISFn9s+ScFWtQgFwno89zeMpk9HI\n" \
+"cyKZInyr8CrewbTEhqh1Y1tg3Ot+6Wk+5yvT83Brag4ZLrc/6lTT3Fc7yKHEV+Td\n" \
+"wVop3WEW4j5ysm/VN51lcC/+TC1Rh3LGiJRRmLqdAoGAVjyZwDEHWCXFiY8z1/nl\n" \
+"OqdeQDky+vNb39u4FvNWSUodLvSYJWgwIh5UFG2+rRaNIK49CY0NPefv0dnOLYuE\n" \
+"M6jx9n3Nc8PdKf0OoIZEssjaBrZusbBotmMpCnxoxD6R4KH5sa2nvdCsxxO32Vr2\n" \
+"Q0KrOvReag0GR/k80WBwUMECgYB156wrzMsNFNrZIkVPYTqF6qtRA/J7kFiZNTzZ\n" \
+"A0pbqwtsjl706LQdhYFvrLHFOnxKmOCY3MFTff8/EOWlI6H+ZgVrKdUzWC9P/eS5\n" \
+"+om3ABnRD4YeE1os2B2XYY+QYVzvhMsmKQ9lhbpcv4t4E6Om8Hz/yyjr59dEjp1O\n" \
+"cJrndQKBgGES6IT9fDR5fUda2G4zuPl5zdTolo3t5vCetL4ZbK07CYYg1c86zX/B\n" \
+"6TJfXwx3nxVGbOeLmEKvUySigiIEWI8cAohBbAHgSCUn0Xz3bGEhCokje9cUWULZ\n" \
+"9czU8540gLWCy2hjHMWDDm2V2WkOBM154DZJy2UgyZnDBdVMUzYu\n" \
+"-----END RSA PRIVATE KEY-----\n";
+
+const char* CLIENT_CERT = \
+"-----BEGIN CERTIFICATE-----\n" \
+"MIIDWTCCAkGgAwIBAgIUSMPJi2nuaZBHcsNRvHGq1asD5wkwDQYJKoZIhvcNAQEL\n" \
+"BQAwTTFLMEkGA1UECwxCQW1hem9uIFdlYiBTZXJ2aWNlcyBPPUFtYXpvbi5jb20g\n" \
+"SW5jLiBMPVNlYXR0bGUgU1Q9V2FzaGluZ3RvbiBDPVVTMB4XDTI1MDgxMzEyMjkz\n" \
+"N1oXDTQ5MTIzMTIzNTk1OVowHjEcMBoGA1UEAwwTQVdTIElvVCBDZXJ0aWZpY2F0\n" \
+"ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANoALfoHbX4jOKcUkOKV\n" \
+"Gy5DcadYkE/wAeGquAw3Y4CP5GkdcPhYB4iy+zDKTQk+Pqjiuun1/GEE7KiDVMqK\n" \
+"dSU0V5uLzj6/wRLhRiI05gAysz7RUSBXhECnhTE/l3tXdYf2gW6PJAn15sMGq8SG\n" \
+"bK7UT4OODV59yqGV8crkr0Wvvz6NbfdlpEQvG/e24KeW+LC6v4VlmcIg3aMahpyg\n" \
+"IOTqa7QiZfEeetf+UuayyJkEvKQFu/eR0QGOTquHosApLlthW8m49U/Zlmt/XBrH\n" \
+"55RjjB96QqbgFFgOKLgZ15TiD63RFS4uVvmd4j1rvBkd5G4C2BLZu2HdxKp7RmQH\n" \
+"440CAwEAAaNgMF4wHwYDVR0jBBgwFoAUpSFn6fkRqO0sUpULNNkSIsiIPg8wHQYD\n" \
+"VR0OBBYEFHMCPDmIaZEYLfVCPc/2g0qtoUceMAwGA1UdEwEB/wQCMAAwDgYDVR0P\n" \
+"AQH/BAQDAgeAMA0GCSqGSIb3DQEBCwUAA4IBAQCOsUpHQYLj5+gr+WJaVMKgV3LW\n" \
+"Wk1hJFNH6ybHKSUVvaJ/8QXWYJfGp4h17YdT47xxjcHUQAFIWtOAh3d9vyIolFNa\n" \
+"SamfJtBci6gG8PN0qfZtt1vytMwCjJMK1aKgoxxRp0X0/2cvkQ/fNm1SfB3g59RV\n" \
+"D/aGqF0A2KJHcNbJM1JXFSqKc/ZpSbyi0Ck3bV2lhPIKqSV5+KQl0Z0KiClcGOD/\n" \
+"niabsk0eujYBatjuKoMHYuTrP5SijnzUKNC3V8SCWXzLRd+laPil/AdhmeyyJ8ZA\n" \
+"n7Bc6teEPcv1d3XbXJFpOh+3FFpBWzsRshKTBzONWBV73aLsKphilgiBm3Ih\n" \
+"-----END CERTIFICATE-----\n";
+
+#endif
