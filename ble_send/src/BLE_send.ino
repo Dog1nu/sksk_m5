@@ -1,4 +1,4 @@
-#include <M5Stack.h>
+#include <M5Unified.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEBeacon.h>
@@ -8,16 +8,19 @@ BLEAdvertising *pAdvertising;
 
 void setup() {
 
-    M5.begin();
+    auto cfg = M5.config();
+    cfg.serial_baudrate = 115200;
+    cfg.clear_display = true;
+    M5.begin(cfg);
 
-    M5.Lcd.setRotation(1);
-    M5.Lcd.fillScreen(BLACK);
+    M5.Display.setRotation(1);
+    M5.Display.fillScreen(BLACK);
 
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setTextSize(3);
+    M5.Display.setTextColor(WHITE);
+    M5.Display.setTextSize(3);
 
-    M5.Lcd.setCursor(20, 40);
-    M5.Lcd.println("M5 BEACON");
+    M5.Display.setCursor(20, 40);
+    M5.Display.println("M5 BEACON");
 
     BLEDevice::init("M5_BEACON");
 
@@ -57,8 +60,8 @@ void setup() {
 
     pAdvertising->start();
 
-    M5.Lcd.setCursor(20, 100);
-    M5.Lcd.println("Advertising...");
+    M5.Display.setCursor(20, 100);
+    M5.Display.println("Advertising...");
 }
 
 void loop() {
@@ -66,9 +69,9 @@ void loop() {
     static bool blue = false;
 
     if (blue) {
-        M5.Lcd.fillCircle(300, 20, 10, BLUE);
+        M5.Display.fillCircle(300, 20, 10, BLUE);
     } else {
-        M5.Lcd.fillCircle(300, 20, 10, BLACK);
+        M5.Display.fillCircle(300, 20, 10, BLACK);
     }
 
     blue = !blue;
