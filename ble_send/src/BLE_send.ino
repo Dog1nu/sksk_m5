@@ -1,10 +1,24 @@
-#include <M5Stack.h>
+#include <M5Unified.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEBeacon.h>
 #include <BLEAdvertising.h>
 
 BLEAdvertising *pAdvertising;
+
+void drawBattery()
+{
+    int battery = M5.Power.getBatteryLevel();
+
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(TFT_YELLOW, BLACK);
+
+    int x = M5.Lcd.width() - 100;
+    int y = M5.Lcd.height() - 24;
+
+    M5.Lcd.setCursor(x, y);
+    M5.Lcd.printf("BAT: %d%%", battery);
+}
 
 void setup() {
 
@@ -18,6 +32,8 @@ void setup() {
 
     M5.Lcd.setCursor(20, 40);
     M5.Lcd.println("M5 BEACON");
+
+    drawBattery();
 
     BLEDevice::init("M5_BEACON");
 
@@ -64,6 +80,7 @@ void setup() {
 void loop() {
 
     static bool blue = false;
+    static unsigned long lastBatteryUpdate = 0;
 
     if (blue) {
         M5.Lcd.fillCircle(300, 20, 10, BLUE);
@@ -72,6 +89,11 @@ void loop() {
     }
 
     blue = !blue;
+
+    if (millis() - lastBatteryUpdate > 5000) {
+        drawBattery();
+        lastBatteryUpdate = millis();
+    }
 
     delay(500);
 }
