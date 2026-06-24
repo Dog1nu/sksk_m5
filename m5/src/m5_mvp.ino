@@ -3,17 +3,10 @@
 #include <BLEScan.h>
 #include <SD.h>
 #include <time.h>
-#include <M5Stack.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
-#include <TJpg_Decoder.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
-#include <PubSubClient.h>
 #include <HTTPClient.h>
-#include "time.h"
-#include "cert.h"
 
 
 BLEScan* pBLEScan;
@@ -47,10 +40,6 @@ volatile int latestRSSI = -100;
 
 volatile float distanceMeter = -1;
 
-// WiFi設定（上部に追加）
-const char* ssid = "BF8D51";
-const char* password = "pfwNYsc4";
-const char* serverURL = "http://192.168.x.x:8000/data"; // FastAPIのURL
 
 
 // =========================
@@ -182,7 +171,9 @@ void bleTask(void *arg)
 // =========================
 void drawUI()
 {
+    
     M5.Display.fillScreen(TFT_NAVY);
+    M5.Display.setBrightness(1);
 
     M5.Display.setTextColor(WHITE);
 
@@ -260,13 +251,6 @@ void setup()
         1
     );
    
-    //wifiセットアップ
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println("WiFi connected");
 }
 
 // =========================
